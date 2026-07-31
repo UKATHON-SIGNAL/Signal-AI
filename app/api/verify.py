@@ -16,6 +16,8 @@ def verify(request: VerifyRequest) -> VerifyResponse:
             evidence_summary=request.evidence_summary,
             category=request.category,
             sources=[source.model_dump() for source in request.sources],
+            creator_average_score=request.creator_average_score,
+            creator_evaluated_count=request.creator_evaluated_count,
         )
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e)) from e

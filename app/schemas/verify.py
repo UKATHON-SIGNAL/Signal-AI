@@ -27,6 +27,8 @@ class VerifyRequest(BaseModel):
     evidence_summary: str
     category: str | None = None
     sources: list[SourceInput] = Field(default_factory=list)
+    creator_average_score: float | None = None
+    creator_evaluated_count: int = 0
 
 
 class EvidenceAssessment(BaseModel):
