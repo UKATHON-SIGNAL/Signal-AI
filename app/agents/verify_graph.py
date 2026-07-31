@@ -21,9 +21,13 @@ _SYNTHESIS_SYSTEM_PROMPT = (
     "- 판정 조건(성공/실패 조건)이 얼마나 명확하고 객관적인가\n"
     "- 기존 정보와의 중복도(낮을수록 가산)\n"
     "- 출처 연결성, 반대 논리 검토 충실도, 누락 변수 보완 정도\n"
-    "- 작성자의 과거 성과(평균 점수, 판정 완료 카드 수) — 성과가 좋을수록 가산 요인, "
-    "판정 불가나 낮은 점수가 누적됐다면 감산 요인. 단, 판정 완료 카드 수가 적은 "
-    "신규 작성자는 성과 데이터 부족을 불리하게 반영하지 말고 리서치 자체 품질로만 평가하세요."
+    "- 작성자의 과거 성과(평균 점수, 판정 완료 카드 수, 과거 출처 신뢰도 평균) — 성과가 "
+    "좋을수록 가산 요인, 판정 불가나 낮은 점수가 누적됐다면 감산 요인. 단, 판정 완료 카드 "
+    "수가 적은 신규 작성자는 성과 데이터 부족을 불리하게 반영하지 말고 리서치 자체 품질로만 "
+    "평가하세요.\n"
+    "- 정보의 유효기간(결과 확인까지 남은 기간) — 남은 기간이 짧을수록 신선하고 시의성 "
+    "있는 정보이므로 가산 요인, 너무 길면(예: 수개월 이상) 당장의 활용 가치가 낮아지므로 "
+    "약간의 감산 요인으로 고려하세요."
 )
 
 
@@ -36,6 +40,8 @@ class VerifyState(TypedDict):
     sources: list[dict]
     creator_average_score: float | None
     creator_evaluated_count: int
+    creator_source_reliability: float | None
+    days_until_result: int | None
 
     evidence_relevance_level: str
     evidence_relevance_comment: str
@@ -88,10 +94,24 @@ def _synthesize_node(state: VerifyState) -> dict:
 
     creator_evaluated_count = state.get("creator_evaluated_count") or 0
     creator_average_score = state.get("creator_average_score")
+    creator_source_reliability = state.get("creator_source_reliability")
     if creator_evaluated_count < 3 or creator_average_score is None:
         creator_summary = f"판정 완료 카드 {creator_evaluated_count}건 — 신규/데이터 부족 작성자, 성과 미반영"
     else:
-        creator_summary = f"판정 완료 카드 {creator_evaluated_count}건, 평균 점수 {creator_average_score}점"
+        reliability_part = (
+            f", 과거 출처 신뢰도 평균 {creator_source_reliability}점"
+            if creator_source_reliability is not None
+            else ""
+        )
+        creator_summary = (
+            f"판정 완료 카드 {creator_evaluated_count}건, 평균 점수 {creator_average_score}점"
+            f"{reliability_part}"
+        )
+
+    days_until_result = state.get("days_until_result")
+    validity_summary = (
+        f"결과 확인까지 약 {days_until_result}일 남음" if days_until_result is not None else "미지정"
+    )
 
     human_content = (
         f"주장: {state['claim']}\n"
@@ -99,7 +119,8 @@ def _synthesize_node(state: VerifyState) -> dict:
         f"실패 조건: {state['failure_condition']}\n"
         f"근거 요약: {state['evidence_summary']}\n"
         f"카테고리: {state.get('category') or '미지정'}\n"
-        f"출처 개수: {len(state['sources'])}\n\n"
+        f"출처 개수: {len(state['sources'])}\n"
+        f"정보 유효기간: {validity_summary}\n\n"
         "[Evidence Agent 평가]\n"
         f"- 출처 연결성: {state['evidence_relevance_level']} — "
         f"{state['evidence_relevance_comment']}\n\n"
@@ -146,6 +167,8 @@ def run_verify_graph(
     sources: list[dict],
     creator_average_score: float | None = None,
     creator_evaluated_count: int = 0,
+    creator_source_reliability: float | None = None,
+    days_until_result: int | None = None,
 ) -> dict:
     return _verify_graph.invoke(
         {
@@ -156,6 +179,8 @@ def run_verify_graph(
             "category": category,
             "creator_average_score": creator_average_score,
             "creator_evaluated_count": creator_evaluated_count,
+            "creator_source_reliability": creator_source_reliability,
+            "days_until_result": days_until_result,
             "sources": sources,
         }
     )

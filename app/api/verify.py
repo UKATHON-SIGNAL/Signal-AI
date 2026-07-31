@@ -18,6 +18,8 @@ def verify(request: VerifyRequest) -> VerifyResponse:
             sources=[source.model_dump() for source in request.sources],
             creator_average_score=request.creator_average_score,
             creator_evaluated_count=request.creator_evaluated_count,
+            creator_source_reliability=request.creator_source_reliability,
+            days_until_result=request.days_until_result,
         )
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e)) from e

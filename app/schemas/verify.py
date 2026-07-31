@@ -29,6 +29,8 @@ class VerifyRequest(BaseModel):
     sources: list[SourceInput] = Field(default_factory=list)
     creator_average_score: float | None = None
     creator_evaluated_count: int = 0
+    creator_source_reliability: float | None = None
+    days_until_result: int | None = None
 
 
 class EvidenceAssessment(BaseModel):
