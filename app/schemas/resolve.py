@@ -5,8 +5,9 @@ from pydantic import BaseModel, Field
 
 class ResultVerdict(str, Enum):
     SUCCESS = "SUCCESS"
-    FAILURE = "FAILURE"
     PARTIAL = "PARTIAL"
+    DIRECTION_ONLY = "DIRECTION_ONLY"
+    FAILURE = "FAILURE"
     INVALID = "INVALID"
 
 
@@ -16,6 +17,9 @@ class ResolveRequest(BaseModel):
     failure_condition: str
     actual_result: str
     evidence_summary: str
+    evaluation_metric: str
+    full_hit_threshold: float
+    partial_hit_threshold: float
 
 
 class ResolutionAssessment(BaseModel):

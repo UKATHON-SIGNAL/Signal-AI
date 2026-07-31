@@ -15,6 +15,9 @@ def resolve(request: ResolveRequest) -> ResolveResponse:
             failure_condition=request.failure_condition,
             actual_result=request.actual_result,
             evidence_summary=request.evidence_summary,
+            evaluation_metric=request.evaluation_metric,
+            full_hit_threshold=request.full_hit_threshold,
+            partial_hit_threshold=request.partial_hit_threshold,
         )
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e)) from e
