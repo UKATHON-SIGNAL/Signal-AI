@@ -20,6 +20,7 @@ def verify(request: VerifyRequest) -> VerifyResponse:
             creator_evaluated_count=request.creator_evaluated_count,
             creator_source_reliability=request.creator_source_reliability,
             days_until_result=request.days_until_result,
+            existing_duplication_score=request.existing_duplication_score,
         )
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e)) from e

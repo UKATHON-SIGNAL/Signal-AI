@@ -31,6 +31,7 @@ class VerifyRequest(BaseModel):
     creator_evaluated_count: int = 0
     creator_source_reliability: float | None = None
     days_until_result: int | None = None
+    existing_duplication_score: float | None = None
 
 
 class EvidenceAssessment(BaseModel):
@@ -57,7 +58,6 @@ class SynthesisAssessment(BaseModel):
     generated_summary: str = Field(description="2~3문장의 카드 요약")
     recommended_price_min: int = Field(description="원화 기준 추천 최저 판매가")
     recommended_price_max: int = Field(description="원화 기준 추천 최고 판매가")
-    duplication_score: float = Field(description="기존에 널리 알려진 정보와의 중복도, 0~100")
     overall_comment: str
 
 
@@ -73,5 +73,4 @@ class VerifyResponse(BaseModel):
     missing_variable_comment: str
     counterargument_level: ReviewLevel
     counterargument_comment: str
-    duplication_score: float
     overall_comment: str
